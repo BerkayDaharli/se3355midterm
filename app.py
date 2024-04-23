@@ -29,8 +29,8 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    category = db.Column(db.Text, nullable=False)
     colors = db.relationship('ProductColor', backref='product')
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
 
 
 class ProductColor(db.Model):
@@ -41,27 +41,53 @@ class ProductColor(db.Model):
     image_url = db.Column(db.Text, nullable=False)
 
 
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category_name = db.Column(db.String(50), nullable=False)
+
+
 def setup_db():
     with app.app_context():
+
         if not database_exists(db.engine.url):
             create_database(db.engine.url)
         db.create_all()
 
+        db.session.query(Campaign).delete()
+        db.session.query(Product).delete()
+        db.session.query(ProductColor).delete()
+        db.session.query(Category).delete()
+        db.session.commit()
+
         if Campaign.query.count() == 0:
             campaigns = [
-                Campaign(title='Summer Sale', description='Up to 50% off on summer items!', image_url=''),
-                Campaign(title='Winter Wonders', description='Explore cozy winter gear!', image_url=''),
-                Campaign(title='Spring Collection', description='Fresh looks for spring!', image_url=''),
-                Campaign(title='Autumn Arrivals', description='Get ready for the cool autumn breeze.', image_url=''),
-                Campaign(title='Back to School', description='Everything you need for school.', image_url='')
+                Campaign(title='Summer Sale', description='Up to 50% off on summer items!', image_url='static/c1.png'),
+                Campaign(title='Winter Wonders', description='Explore cozy winter gear!', image_url='static/c1.png'),
+                Campaign(title='Spring Collection', description='Fresh looks for spring!', image_url='static/c1.png'),
+                Campaign(title='Autumn Arrivals', description='Get ready for the cool autumn breeze.', image_url='static/c1.png'),
+                Campaign(title='Back to School', description='Everything you need for school.', image_url='static/c1.png')
             ]
             db.session.add_all(campaigns)
             db.session.commit()
-
+        if Category.query.count() == 0:
+            categories = [
+                Category(category_name='Laptops'),
+                Category(category_name='Desktops'),
+                Category(category_name='Monitors'),
+                Category(category_name='Keyboards'),
+                Category(category_name='Mouses'),
+                Category(category_name='CPUs'),
+                Category(category_name='GPUs'),
+                Category(category_name='RAM Modules')
+            ]
+        db.session.add_all(categories)
+        db.session.commit()
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    campaigns = Campaign.query.all()
+    categories = Category.query.all()
+    return render_template("index.html", campaigns=campaigns, categories=categories)
 
 
 if __name__ == "__main__":
