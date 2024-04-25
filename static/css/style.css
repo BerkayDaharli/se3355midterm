@@ -1,3 +1,90 @@
-.navbar .dropdown:hover .dropdown-menu {
-    display: block;
+#campaignCarousel .carousel-item {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adds text shadow for better readability */
+}
+
+#campaignCarousel .carousel-item h2 {
+    font-size: 3rem; /* Large font size for the title */
+    margin-bottom: 1rem;
+}
+
+#campaignCarousel .carousel-item p {
+    font-size: 1.5rem; /* Size for the description */
+    margin-bottom: 2rem;
+}
+
+#campaignCarousel .btn-primary {
+    font-size: 1.2rem; /* Larger button font size */
+    padding: 0.75rem 1.5rem; /* Larger button padding */
+    z-index: 20;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(100%); /* Make the controls white if needed */
+}
+
+.campaign-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* This will put some space between the elements */
+}
+
+
+.campaign-box {
+    flex: 1; /* Takes up half of the container */
+    padding-right: 20px; /* Adjusts spacing between text and image */
+    display: flex;
+    flex-direction: column; /* Stack the content vertically */
+    justify-content: center; /* Center the content vertically */
+    align-items: center; /* Center the content horizontally */
+    text-align: center; /* Ensure text is centered */
+    margin-right: auto;
+}
+
+.campaign-image {
+    flex: 1; /* Allows the image to take the remaining space */
+    max-width: 40%; /* Reduce the maximum width a bit */
+    object-fit: contain; /* Ensures that the whole image is visible */
+    margin-right: 200px; /* Increase margin to push the image away from the controls */
+    margin-left: auto;
+}
+
+.campaign-details h2 {
+    margin-top: 20px; /* Margin between title and image */
+}
+
+.campaign-details p {
+    margin-bottom: 20px; /* Margin between description and button */
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 10px; /* Move indicators to the bottom of the carousel */
+    right: 0;
+    left: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    padding-left: 0;
+    margin-right: 15%;
+    margin-left: 15%;
+    list-style: none;
+}
+
+.carousel-indicators li {
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    background-color: #111;
+    margin: 0 2px;
+    cursor: pointer;
+}
+
+.carousel-indicators .active {
+    background-color: #000;
+}
+
+body {
+    background: linear-gradient(to right, #007bff, #6f42c1); /* Gradient from blue to purple */
+    color: #fff; /* White text for better readability against a dark background */
 }

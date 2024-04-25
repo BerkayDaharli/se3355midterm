@@ -16,12 +16,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
 class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255), nullable=False)
-
+    button_name = db.Column(db.String(50), nullable=False)
+    campaign_link = db.Column(db.String(255), nullable=False)
     def __repr__(self):
         return f'<Campaign {self.title}>'
 
@@ -62,11 +64,21 @@ def setup_db():
 
         if Campaign.query.count() == 0:
             campaigns = [
-                Campaign(title='Summer Sale', description='Up to 50% off on summer items!', image_url='static/c1.png'),
-                Campaign(title='Winter Wonders', description='Explore cozy winter gear!', image_url='static/c2.png'),
-                Campaign(title='Spring Collection', description='Fresh looks for spring!', image_url='static/c3.png'),
-                Campaign(title='Autumn Arrivals', description='Get ready for the cool autumn breeze.', image_url='static/c4.png'),
-                Campaign(title='Back to School', description='Everything you need for school.', image_url='static/c5.png')
+                Campaign(title='Summer Sale', description='Up to 50% off on summer items!',
+                         image_url='static/c1.png', button_name="Hemen al!",
+                         campaign_link='#'),
+                Campaign(title='Winter Wonders', description='Explore cozy winter gear!',
+                         image_url='static/c2.png', button_name="Bu fırsatı kaçırma!",
+                         campaign_link='#'),
+                Campaign(title='Spring Collection', description='Fresh looks for spring!',
+                         image_url='static/c3.png', button_name="Alışverişe başla",
+                         campaign_link='#'),
+                Campaign(title='Autumn Arrivals', description='Get ready for the cool autumn breeze.',
+                         image_url='static/c4.png', button_name="Acele et kaçırma",
+                         campaign_link='#'),
+                Campaign(title='Back to School', description='Everything you need for school.',
+                         image_url='static/c5.png', button_name="Acele et kaçırma",
+                         campaign_link='#')
             ]
             db.session.add_all(campaigns)
             db.session.commit()
