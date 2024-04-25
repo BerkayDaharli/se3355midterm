@@ -48,8 +48,8 @@
             </li>
         </ul>
 
-        <form class="form-inline">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search products" aria-label="Search">
+        <form class="form-inline" action="/search" method="get">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search products" aria-label="Search" name="search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
     </div>
@@ -77,7 +77,7 @@
                     <a href="{{ campaign.campaign_link }}" class="btn btn-primary">{{ campaign.button_name }}</a>
                 </div>
                 <!-- Image on the right -->
-                <img src="{{ campaign.image_url }}" class="campaign-image" alt="Campaign Image" style="flex: 1; max-width: 50%;">
+                <img src="{{url_for('static', filename=campaign.image_file_name) }}" class="campaign-image" alt="Campaign Image" style="flex: 1; max-width: 50%;">
             </div>
         </div>
         {% endfor %}

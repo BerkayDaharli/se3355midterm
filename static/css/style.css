@@ -88,3 +88,58 @@ body {
     background: linear-gradient(to right, #007bff, #6f42c1); /* Gradient from blue to purple */
     color: #fff; /* White text for better readability against a dark background */
 }
+
+/* Product Card */
+.card {
+    border: none; /* Remove border */
+    transition: transform .2s; /* Animation for hover effect */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* Subtle shadow to lift the card */
+}
+
+.card:hover {
+    transform: scale(1.05); /* Slightly increase the size on hover */
+}
+
+.card-img-top {
+    width: 100%;
+    height: 250px; /* Fixed height for consistency */
+    object-fit: cover; /* Cover the entire card's area */
+}
+
+.card-title {
+    height: 60px; /* Fixed height for consistent titles */
+    overflow: hidden; /* Hide overflow text */
+    line-height: 1.5em; /* Spacing for line height */
+    margin-bottom: 10px; /* Space before the price */
+    color: #000;
+}
+
+.card-text {
+    font-weight: bold; /* Make price bold */
+    color: #E53238; /* Bright color for price */
+}
+
+/* Responsive columns */
+@media (max-width: 767px) {
+    .col-sm-6 {
+        max-width: 50%;
+    }
+}
+
+/* Spacing between cards */
+.col-md-4 {
+    padding: 0 15px; /* Space inside columns */
+}
+
+.mb-4 {
+    margin-bottom: 30px; /* Space below each card */
+}
+
+/* Responsive behavior for small screens */
+@media (max-width: 576px) {
+    .col-sm-6 {
+        max-width: 100%;
+        flex: 0 0 100%;
+        padding: 0 15px; /* Space inside columns */
+    }
+}

@@ -3,27 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berkay's Store</title>
+    <title>Search Results - Berkay's Store</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .carousel-indicators {
-            position: absolute;
-            top: 10px;
-            right: 0;
-            left: 0;
-            z-index: 15;
-            display: -ms-flexbox;
-            display: flex;
-            -ms-flex-pack: center;
-            justify-content: center;
-            padding-left: 0;
-            margin-right: 15%;
-            margin-left: 15%;
-            list-style: none;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -57,26 +40,34 @@
 </nav>
 
     </header>
-    <main>
+  <main>
     <div class="container mt-4">
         <div class="row">
-            {% for product in products %}
-                <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="card h-100">
-                        <!-- Product Image -->
-                       <img src="{{ url_for('static', filename='productImages/' + product.colors[0].image_file_name) }}" class="card-img-top" alt="{{ product.product_title }}">
-                        <div class="card-body">
-                            <!-- Product Title -->
-                            <h5 class="card-title">{{ product.product_title }}</h5>
-                            <!-- Price (Assuming the first color has the price you want to show) -->
-                            <p class="card-text">{{ product.colors[0].price }} TL</p>
+            <div class="col-12">
+                <h2>Search Results for '{{query}}'</h2>
+            </div>
+        </div>
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                    <div class="col-md-4 col-sm-6 mb-4">
+                        <div class="card h-100">
+                            <img src="{{ url_for('static', filename='productImages/' + product.colors[0].image_file_name) }}" class="card-img-top" alt="{{ product.product_title }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.product_title }}</h5>
+                                <p class="card-text">{{ product.colors[0].price }} TL</p>
+                            </div>
                         </div>
                     </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <p class="alert alert-warning" role="alert">No products found.</p>
                 </div>
-            {% endfor %}
+            {% endif %}
         </div>
     </div>
-    </main>
+</main>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
