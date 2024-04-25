@@ -1,13 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, redirect, render_template, request, url_for, session
+from flask import Flask, render_template, request, session
 from flask_migrate import Migrate
-from sqlalchemy.orm import joinedload
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy import or_, and_
 
 app = Flask(__name__)
 app.secret_key = '12345'
-
 
 username = "postgres"
 password = "postgres"
@@ -62,15 +60,12 @@ def search_products(query):
     query_obj = Product.query \
         .join(Product.colors) \
         .join(Product.shipped_from) \
-        .filter(
-            or_(
-                Product.product_title.ilike(f"%{query}%"),
-                Product.description.ilike(f"%{query}%"),
-                ProductColor.color.ilike(f"%{query}%"),
-                City.name.ilike(f"%{query}%")
-            )
-        ) \
-        .distinct()
+        .filter(or_(
+            Product.product_title.ilike(f"%{query}%"),
+            Product.description.ilike(f"%{query}%"),
+            ProductColor.color.ilike(f"%{query}%"),
+            City.name.ilike(f"%{query}%")
+        )).distinct()
 
     # Print the actual SQL query
     print(query_obj)  # Or use print(str(query_obj.statement.compile(compile_kwargs={"literal_binds": True}))) for the full query
@@ -131,7 +126,7 @@ def setup_city_db():
                 {'city_name': 'Isparta'},
                 {'city_name': 'İstanbul'},
                 {'city_name': 'İzmir'},
-                {'city_name': 'Kahramanmarai'},
+                {'city_name': 'Kahramanmaraş'},
                 {'city_name': 'Karabük'},
                 {'city_name': 'Karaman'},
                 {'city_name': 'Kars'},
@@ -179,6 +174,7 @@ def setup_city_db():
                 db.session.add(add_city)
                 db.session.flush()
             db.session.commit()
+
 
 def setup_db():
     with app.app_context():
@@ -394,6 +390,7 @@ def setup_db():
 
             db.session.commit()
 
+
 @app.route("/")
 def home():
     campaigns = Campaign.query.all()
@@ -421,6 +418,8 @@ def show_category(category_id):
     return render_template('category.html', category=category, products=products,
                            cities=cities, selected_city_id=int(selected_city_id),
                            categories=categories, doorstep_tomorrow=doorstep_tomorrow)
+
+
 @app.route('/search', methods=['GET'])
 def search():
     cities = City.query.all()
@@ -435,7 +434,7 @@ def search():
 
     if query:
         products = search_products(query)
-        products.sort(key=lambda x: x.shipped_from_id != int(selected_city_id)) 
+        products.sort(key=lambda x: x.shipped_from_id != int(selected_city_id))
         return render_template('searchresult.html', categories=categories,
                                products=products, query=query, cities=cities,
                                selected_city_id=int(selected_city_id), doorstep_tomorrow=doorstep_tomorrow)
@@ -443,6 +442,7 @@ def search():
         return render_template('searchresult.html', categories=categories,
                                products=[], query=query, cities=cities, selected_city_id=int(selected_city_id),
                                doorstep_tomorrow=doorstep_tomorrow)
+
 
 if __name__ == "__main__":
     setup_db()
