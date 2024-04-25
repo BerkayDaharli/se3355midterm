@@ -38,6 +38,24 @@
         </form>
     </div>
 </nav>
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<form class="form-inline w-100" action="{{ url_for('search') }}" method="get">
+    <!-- Retain the search query when the city is selected -->
+    <input type="hidden" name="search" value="{{ query }}">
+
+    <label for="citySelect" class="font-weight-bold mr-2">City:</label>
+    <select class="form-control mr-sm-2" id="citySelect" name="city_id" onchange="this.form.submit()">
+        {% for city in cities %}
+        <option value="{{ city.id }}" {% if city.id|string == selected_city_id|string %}selected{% endif %}>{{ city.name }}</option>
+        {% endfor %}
+    </select>
+
+    <div class="custom-control custom-switch ml-auto">
+        <input type="checkbox" class="custom-control-input" id="doorstepTomorrow" name="doorstep_tomorrow" value="true" onchange="this.form.submit()" {% if request.args.get('doorstep_tomorrow', 'false') == 'true' %}checked{% endif %}>
+        <label class="custom-control-label" for="doorstepTomorrow">By Your Doorstep Tomorrow</label>
+    </div>
+</form>
+        </nav>
 
     </header>
   <main>
@@ -49,17 +67,27 @@
         </div>
         <div class="row">
             {% if products %}
-                {% for product in products %}
-                    <div class="col-md-4 col-sm-6 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ url_for('static', filename='productImages/' + product.colors[0].image_file_name) }}" class="card-img-top" alt="{{ product.product_title }}">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ product.product_title }}</h5>
-                                <p class="card-text">{{ product.colors[0].price }} TL</p>
-                            </div>
+        {% for product in products %}
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="card h-100 {% if product.shipped_from_id == selected_city_id|string %}border-success{% else %}border-light{% endif %}">
+                    <!-- Product Image -->
+                    <img src="{{ url_for('static', filename='productImages/' + product.colors[0].image_file_name) }}" class="card-img-top" alt="{{ product.product_title }}">
+                    <!-- Mark if shipped from selected city -->
+                    {% if product.shipped_from_id == selected_city_id and doorstep_tomorrow%}
+                        <div class="badge badge-success" style="position: absolute; top: 10px; left: 10px;">
+                            By your doorstep tomorrow!
                         </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <!-- Product Title -->
+                        <h5 class="card-title">{{ product.product_title }}</h5>
+                        <p class="product-shipped-from">Shipping from: {{cities[product.shipped_from_id].name}}</p>
+                        <!-- Price -->
+                        <p class="card-text">{{ product.colors[0].price }} TL</p>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
             {% else %}
                 <div class="col-12">
                     <p class="alert alert-warning" role="alert">No products found.</p>

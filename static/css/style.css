@@ -143,3 +143,18 @@ body {
         padding: 0 15px; /* Space inside columns */
     }
 }
+
+.font-weight-bold{
+    color:#000;
+}
+.custom-control-label{
+    color:#000;
+}
+.product-shipped-from{
+    color: #000;
+}
+
+/* Add a border to the bottom of the main navbar */
+.navbar-main {
+    border-bottom: 2px solid #ccc; /* Adjust color and thickness as needed */
+}

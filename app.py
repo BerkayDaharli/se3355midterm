@@ -1,11 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, session
 from flask_migrate import Migrate
 from sqlalchemy.orm import joinedload
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy import or_, and_
 
 app = Flask(__name__)
+app.secret_key = '12345'
+
 
 username = "postgres"
 password = "postgres"
@@ -80,84 +82,91 @@ def search_products(query):
 def setup_city_db():
     with app.app_context():
         if City.query.count() != 81:
+            initial_city = City(
+                name="All Cities",
+                id=0
+            )
+            db.session.add(initial_city)
+            db.session.flush()
+            db.session.commit()
             cities = [
                 {'city_name': 'Adana'},
-                {'city_name': 'Adiyaman'},
+                {'city_name': 'Adıyaman'},
                 {'city_name': 'Afyon'},
-                {'city_name': 'Agri'},
+                {'city_name': 'Ağrı'},
                 {'city_name': 'Aksaray'},
                 {'city_name': 'Amasya'},
                 {'city_name': 'Ankara'},
                 {'city_name': 'Antalya'},
                 {'city_name': 'Ardahan'},
                 {'city_name': 'Artvin'},
-                {'city_name': 'Aydin'},
-                {'city_name': 'Balikesir'},
-                {'city_name': 'Bartin'},
+                {'city_name': 'Aydın'},
+                {'city_name': 'Balıkesir'},
+                {'city_name': 'Bartın'},
                 {'city_name': 'Batman'},
                 {'city_name': 'Bayburt'},
                 {'city_name': 'Bilecik'},
-                {'city_name': 'Bingol'},
+                {'city_name': 'Bingöl'},
                 {'city_name': 'Bitlis'},
                 {'city_name': 'Bolu'},
                 {'city_name': 'Burdur'},
                 {'city_name': 'Bursa'},
-                {'city_name': 'Canakkale'},
-                {'city_name': 'Cankiri'},
-                {'city_name': 'Corum'},
+                {'city_name': 'Çanakkale'},
+                {'city_name': 'Çankırı'},
+                {'city_name': 'Çorum'},
                 {'city_name': 'Denizli'},
-                {'city_name': 'Diyarbakir'},
-                {'city_name': 'Duzce'},
+                {'city_name': 'Diyarbakır'},
+                {'city_name': 'Düzce'},
                 {'city_name': 'Edirne'},
-                {'city_name': 'Elazig'},
+                {'city_name': 'Elazığ'},
                 {'city_name': 'Erzincan'},
                 {'city_name': 'Erzurum'},
-                {'city_name': 'Eskisehir'},
+                {'city_name': 'Eskişehir'},
                 {'city_name': 'Gaziantep'},
                 {'city_name': 'Giresun'},
-                {'city_name': 'Gumushane'},
+                {'city_name': 'Gümüşhane'},
                 {'city_name': 'Hakkari'},
                 {'city_name': 'Hatay'},
-                {'city_name': 'Igdir'},
+                {'city_name': 'Iğdır'},
                 {'city_name': 'Isparta'},
-                {'city_name': 'Istanbul'},
-                {'city_name': 'Izmir'},
-                {'city_name': 'Kahramanmaras'},
-                {'city_name': 'Karabuk'},
+                {'city_name': 'İstanbul'},
+                {'city_name': 'İzmir'},
+                {'city_name': 'Kahramanmarai'},
+                {'city_name': 'Karabük'},
                 {'city_name': 'Karaman'},
                 {'city_name': 'Kars'},
                 {'city_name': 'Kastamonu'},
                 {'city_name': 'Kayseri'},
                 {'city_name': 'Kilis'},
-                {'city_name': 'Kirikkale'},
-                {'city_name': 'Kirklareli'},
-                {'city_name': 'Kirsehir'},
+                {'city_name': 'Kırıkkale'},
+                {'city_name': 'Kırklareli'},
+                {'city_name': 'Kırşehir'},
                 {'city_name': 'Kocaeli'},
                 {'city_name': 'Konya'},
-                {'city_name': 'Kutahya'},
+                {'city_name': 'Kütahya'},
                 {'city_name': 'Malatya'},
                 {'city_name': 'Manisa'},
                 {'city_name': 'Mardin'},
                 {'city_name': 'Mersin'},
-                {'city_name': 'Mugla'},
-                {'city_name': 'Mus'},
-                {'city_name': 'Nevsehir'},
-                {'city_name': 'Nigde'},
+                {'city_name': 'Muğla'},
+                {'city_name': 'Muş'},
+                {'city_name': 'Nevşehir'},
+                {'city_name': 'Niğde'},
                 {'city_name': 'Ordu'},
                 {'city_name': 'Osmaniye'},
                 {'city_name': 'Rize'},
                 {'city_name': 'Sakarya'},
                 {'city_name': 'Samsun'},
-                {'city_name': 'Sanliurfa'},
+                {'city_name': 'Şanlıurfa'},
                 {'city_name': 'Siirt'},
                 {'city_name': 'Sinop'},
-                {'city_name': 'Sirnak'},
+                {'city_name': 'Şırnak'},
                 {'city_name': 'Sivas'},
-                {'city_name': 'Tekirdag'},
+                {'city_name': 'Tekirdağ'},
                 {'city_name': 'Tokat'},
                 {'city_name': 'Trabzon'},
                 {'city_name': 'Tunceli'},
-                {'city_name': 'Usak'},
+                {'city_name': 'Uşak'},
                 {'city_name': 'Van'},
                 {'city_name': 'Yalova'},
                 {'city_name': 'Yozgat'},
@@ -392,23 +401,48 @@ def home():
     return render_template("index.html", campaigns=campaigns, categories=categories)
 
 
-@app.route('/category/<int:category_id>')
+@app.route('/category/<int:category_id>', methods=['GET'])
 def show_category(category_id):
+    cities = City.query.all()
     category = Category.query.get_or_404(category_id)
-    products = Product.query.filter_by(category_id=category_id).all()
+
+    # Retrieve city_id from request or session
+    selected_city_id = request.args.get('city_id', default=session.get('selected_city_id', None))
+    session['selected_city_id'] = selected_city_id  # Update session
+
+    doorstep_tomorrow = request.args.get('doorstep_tomorrow', 'false') == 'true'
     categories = Category.query.all()
-    return render_template('category.html', category=category, products=products, categories=categories)
 
+    # Fetch all products but sort them based on the shipping city
+    products = Product.query.filter_by(category_id=category_id).all()
+    if selected_city_id:
+        products.sort(key=lambda x: x.shipped_from_id != int(selected_city_id))
 
+    return render_template('category.html', category=category, products=products,
+                           cities=cities, selected_city_id=int(selected_city_id),
+                           categories=categories, doorstep_tomorrow=doorstep_tomorrow)
 @app.route('/search', methods=['GET'])
 def search():
+    cities = City.query.all()
     query = request.args.get('search')
     categories = Category.query.all()
+
+    # Retrieve city_id from request or session
+    selected_city_id = request.args.get('city_id', default=session.get('selected_city_id', None))
+    session['selected_city_id'] = selected_city_id  # Update session
+
+    doorstep_tomorrow = request.args.get('doorstep_tomorrow', 'false') == 'true'
+
     if query:
         products = search_products(query)
-        return render_template('searchresult.html', categories=categories, products=products, query=query)
+        products.sort(key=lambda x: x.shipped_from_id != int(selected_city_id)) 
+        return render_template('searchresult.html', categories=categories,
+                               products=products, query=query, cities=cities,
+                               selected_city_id=int(selected_city_id), doorstep_tomorrow=doorstep_tomorrow)
     else:
-        return render_template('searchresult.html', categories=categories, products=[], query=query)
+        return render_template('searchresult.html', categories=categories,
+                               products=[], query=query, cities=cities, selected_city_id=int(selected_city_id),
+                               doorstep_tomorrow=doorstep_tomorrow)
 
 if __name__ == "__main__":
     setup_db()

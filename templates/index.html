@@ -6,23 +6,7 @@
     <title>Berkay's Store</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .carousel-indicators {
-            position: absolute;
-            top: 10px; /* Adjust this value to position the indicators from the top */
-            right: 0;
-            left: 0;
-            z-index: 15;
-            display: -ms-flexbox;
-            display: flex;
-            -ms-flex-pack: center;
-            justify-content: center;
-            padding-left: 0;
-            margin-right: 15%;
-            margin-left: 15%;
-            list-style: none;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <header>
@@ -54,7 +38,6 @@
         </form>
     </div>
 </nav>
-
     </header>
     <main>
 <div id="campaignCarousel" class="carousel slide" data-ride="carousel">
