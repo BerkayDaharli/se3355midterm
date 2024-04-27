@@ -1,8 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, session
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from sqlalchemy_utils import database_exists, create_database
-from sqlalchemy import or_, and_
 
 app = Flask(__name__)
 app.secret_key = '12345'
@@ -36,6 +36,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     shipped_from_id = db.Column(db.Integer, db.ForeignKey('city.id'))
     shipped_from = db.relationship('City', backref=db.backref('products', lazy=True))
+    images = db.relationship('Image', backref='product')  # One-to-many relationship for images
 
 
 class ProductColor(db.Model):
@@ -43,7 +44,15 @@ class ProductColor(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     color = db.Column(db.Text, nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
+    images = db.relationship('Image', backref='product_color')  # One-to-many relationship for images
+
+
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     image_file_name = db.Column(db.Text, nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=True)
+    product_color_id = db.Column(db.Integer, db.ForeignKey('product_color.id'), nullable=True)
+    # You can also add more fields if needed, such as image_type or upload_date
 
 
 class Category(db.Model):
@@ -61,20 +70,34 @@ def search_products(query):
         .join(Product.colors) \
         .join(Product.shipped_from) \
         .filter(or_(
-            Product.product_title.ilike(f"%{query}%"),
-            Product.description.ilike(f"%{query}%"),
-            ProductColor.color.ilike(f"%{query}%"),
-            City.name.ilike(f"%{query}%")
-        )).distinct()
+        Product.product_title.ilike(f"%{query}%"),
+        Product.description.ilike(f"%{query}%"),
+        ProductColor.color.ilike(f"%{query}%"),
+        City.name.ilike(f"%{query}%")
+    )).distinct()
 
     # Print the actual SQL query
-    print(query_obj)  # Or use print(str(query_obj.statement.compile(compile_kwargs={"literal_binds": True}))) for the full query
+    print(
+        query_obj)  # Or use print(str(query_obj.statement.compile(compile_kwargs={"literal_binds": True}))) for the full query
     results = query_obj.all()
     print(results)
     return results
 
 
-def setup_city_db():
+def setup_db():
+    with app.app_context():
+        db.drop_all()
+        if not database_exists(db.engine.url):
+            create_database(db.engine.url)
+        db.create_all()
+
+        add_cities()
+        add_campaigns()
+        add_categories()
+        add_products_with_images()
+
+
+def add_cities():
     with app.app_context():
         if City.query.count() != 81:
             initial_city = City(
@@ -176,219 +199,105 @@ def setup_city_db():
             db.session.commit()
 
 
-def setup_db():
-    with app.app_context():
-        db.drop_all()
-        if not database_exists(db.engine.url):
-            create_database(db.engine.url)
-        db.create_all()
-
-        db.session.query(Campaign).delete()
-        db.session.query(Product).delete()
-        db.session.query(ProductColor).delete()
-        db.session.query(Category).delete()
-        db.session.query(City).delete()
+def add_campaigns():
+    if Campaign.query.count() == 0:
+        campaigns = [
+            Campaign(title='Summer Sale', description='Up to 50% off on summer items!',
+                     image_file_name='c1.png', button_name="Hemen al!",
+                     campaign_link='category/1'),
+            Campaign(title='Winter Wonders', description='Explore cozy winter gear!',
+                     image_file_name='c2.png', button_name="Bu fırsatı kaçırma!",
+                     campaign_link='#'),
+            Campaign(title='Spring Collection', description='Fresh looks for spring!',
+                     image_file_name='c3.png', button_name="Alışverişe başla",
+                     campaign_link='#'),
+            Campaign(title='Autumn Arrivals', description='Get ready for the cool autumn breeze.',
+                     image_file_name='c4.png', button_name="Acele et kaçırma",
+                     campaign_link='#'),
+            Campaign(title='Back to School', description='Everything you need for school.',
+                     image_file_name='c5.png', button_name="Acele et kaçırma",
+                     campaign_link='#')
+        ]
+        db.session.bulk_save_objects(campaigns)
         db.session.commit()
 
-        setup_city_db()
-        if Campaign.query.count() == 0:
-            campaigns = [
-                Campaign(title='Summer Sale', description='Up to 50% off on summer items!',
-                         image_file_name='c1.png', button_name="Hemen al!",
-                         campaign_link='#'),
-                Campaign(title='Winter Wonders', description='Explore cozy winter gear!',
-                         image_file_name='c2.png', button_name="Bu fırsatı kaçırma!",
-                         campaign_link='#'),
-                Campaign(title='Spring Collection', description='Fresh looks for spring!',
-                         image_file_name='c3.png', button_name="Alışverişe başla",
-                         campaign_link='#'),
-                Campaign(title='Autumn Arrivals', description='Get ready for the cool autumn breeze.',
-                         image_file_name='c4.png', button_name="Acele et kaçırma",
-                         campaign_link='#'),
-                Campaign(title='Back to School', description='Everything you need for school.',
-                         image_file_name='c5.png', button_name="Acele et kaçırma",
-                         campaign_link='#')
-            ]
-            db.session.add_all(campaigns)
-            db.session.commit()
-        if Category.query.count() == 0:
-            categories = [
-                Category(category_name='Laptops'),
-                Category(category_name='Desktops'),
-                Category(category_name='Monitors'),
-                Category(category_name='Keyboards'),
-                Category(category_name='Mouses'),
-                Category(category_name='CPUs'),
-                Category(category_name='GPUs'),
-                Category(category_name='RAM Modules')
-            ]
-            db.session.add_all(categories)
-        if Product.query.count() == 0 and ProductColor.query.count() == 0:
-            # Example: Add mock data for a few products
-            mock_products = [
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 71
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 61
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 51
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 21
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 11
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 15
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 14
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 12
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 12
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 81
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 34
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 61
-                },
-                {
-                    'product_title': 'Gaming Laptop',
-                    'description': 'A powerful gaming laptop to enjoy your games on the go.',
-                    'category_id': 1,  # Assuming 'Laptops' has ID 1
-                    'colors': [
-                        {'color': 'Black', 'price': 999.99, 'image_file_name': 'c1.png'},
-                        {'color': 'White', 'price': 1049.99, 'image_file_name': 'c2.png'}
-                    ],
-                    'shipped_from_id': 3
-                },
-                {
-                    'product_title': 'Professional Monitor',
-                    'description': 'A high-resolution monitor for professionals.',
-                    'category_id': 3,  # Assuming 'Monitors' has ID 3
-                    'colors': [
-                        {'color': 'Silver', 'price': 299.99, 'image_file_name': 'c3.png'}
-                    ],
-                    'shipped_from_id': 5
-                },
-                # Add as many products as you need here...
-            ]
 
-            # Create and add products and their colors to the database
-            for mock_product in mock_products:
-                product = Product(
-                    product_title=mock_product['product_title'],
-                    description=mock_product['description'],
-                    category_id=mock_product['category_id'],
-                    shipped_from_id=mock_product['shipped_from_id']
+def add_categories():
+    if Category.query.count() == 0:
+        categories = [
+            Category(category_name='Laptops'),
+            Category(category_name='Desktops'),
+            Category(category_name='Monitors'),
+            Category(category_name='Keyboards'),
+            Category(category_name='Mouses'),
+            Category(category_name='CPUs'),
+            Category(category_name='GPUs'),
+            Category(category_name='RAM Modules')
+        ]
+        db.session.bulk_save_objects(categories)
+        db.session.commit()
+
+
+def add_products_with_images():
+    if Product.query.count() == 0:
+        product_details = [{
+            'title': 'Smartphone',
+            'description': 'High-performance smartphone with advanced camera features.',
+            'category_id': 1,
+            'shipped_from_id': 1,
+            'images': ['product_overview.jpg'],  # General images for the product
+            'colors': [
+                {
+                    'color': 'Black',
+                    'price': 999.99,
+                    'images': ['c3.png', 'c4.png']
+                },
+                {
+                    'color': 'White',
+                    'price': 1000.99,
+                    'images': ['c1.png', 'c2.png']
+                }
+            ]
+        }]
+
+        # Create and add products, their colors, and images to the database
+        for mock_product in product_details:
+            product = Product(
+                product_title=mock_product['title'],
+                description=mock_product['description'],
+                category_id=mock_product['category_id'],
+                shipped_from_id=mock_product['shipped_from_id']
+            )
+            db.session.add(product)
+            db.session.flush()
+
+            # Add general product images
+            for image_file_name in mock_product['images']:
+                image = Image(
+                    image_file_name=image_file_name,
+                    product_id=product.id  # Linking the image directly to the product
                 )
-                db.session.add(product)
-                db.session.flush()  # This is to ensure we get the product ID after adding
+                db.session.add(image)
 
-                for color in mock_product['colors']:
-                    product_color = ProductColor(
-                        product_id=product.id,
-                        color=color['color'],
-                        price=color['price'],
-                        image_file_name=color['image_file_name']
+            # Add product colors and their specific images
+            for color_info in mock_product['colors']:
+                product_color = ProductColor(
+                    product_id=product.id,
+                    color=color_info['color'],
+                    price=color_info['price']
+                )
+                db.session.add(product_color)
+                db.session.flush()
+
+                # Add images specific to this color variant
+                for image_file_name in color_info['images']:
+                    image = Image(
+                        image_file_name=image_file_name,
+                        product_color_id=product_color.id
                     )
-                    db.session.add(product_color)
+                    db.session.add(image)
 
-            db.session.commit()
+        db.session.commit()
 
 
 @app.route("/")
@@ -443,6 +352,20 @@ def search():
                                products=[], query=query, cities=cities, selected_city_id=int(selected_city_id),
                                doorstep_tomorrow=doorstep_tomorrow)
 
+
+@app.route('/product/<int:product_id>')
+def product_page(product_id):
+    # Fetch product details from database based on product_id
+    product = Product.query.get(product_id)
+    colors = ProductColor.query.filter_by(product_id=product_id).all()
+    categories = Category.query.all()
+    # Assume each color has an 'images' attribute that is a list of Image instances
+
+    # You can adjust the query based on your actual database structure
+    if product:
+        return render_template('productpage.html', product=product, colors=colors, categories=categories)
+    else:
+        return render_template('404productNotFound.html', categories=categories)
 
 if __name__ == "__main__":
     setup_db()

@@ -62,27 +62,30 @@
         </form>
     </nav>
 </header>
-
 <main>
-
-
     <div class="container mt-4">
         <div class="row">
             {% for product in products %}
             <div class="col-md-4 col-sm-6 mb-4">
                 <div class="card h-100 {% if product.shipped_from_id == selected_city_id|string %}border-success{% else %}border-light{% endif %}">
                     <!-- Product Image -->
-                    <img src="{{ url_for('static', filename='productImages/' + product.colors[0].image_file_name) }}"
-                         class="card-img-top" alt="{{ product.product_title }}">
+                    <a href="{{ url_for('product_page', product_id=product.id) }}"
+                       class="text-decoration-none text-dark">
+                        <img src="{{ url_for('static', filename='productImages/' + product.colors[0].images[0].image_file_name) }}"
+                             class="card-img-top" alt="{{ product.product_title }}">
+                    </a>
                     <!-- Mark if shipped from selected city -->
-                    {% if product.shipped_from_id == selected_city_id and doorstep_tomorrow%}
+                    {% if product.shipped_from_id == selected_city_id and doorstep_tomorrow %}
                     <div class="badge badge-success" style="position: absolute; top: 10px; left: 10px;">
                         By your doorstep tomorrow!
                     </div>
                     {% endif %}
                     <div class="card-body">
                         <!-- Product Title -->
-                        <h5 class="card-title">{{ product.product_title }}</h5>
+                        <a href="{{ url_for('product_page', product_id=product.id) }}"
+                           class="text-decoration-none text-dark">
+                            <h5 class="card-title">{{ product.product_title }}</h5>
+                        </a>
                         <p class="product-shipped-from">Shipping from: {{cities[product.shipped_from_id].name}}</p>
                         <!-- Price -->
                         <p class="card-text">{{ product.colors[0].price }} TL</p>
@@ -92,7 +95,6 @@
             {% endfor %}
         </div>
     </div>
-
 </main>
 
 <!-- Bootstrap JS and dependencies -->

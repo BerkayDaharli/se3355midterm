@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.product_title }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<!-- Rest of the header and navigation code... -->
+<header>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <a class="navbar-brand" href="/">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Berkay's Store Logo" height="40">
+            <!-- Adjust height as needed -->
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                       data-toggle="dropdown" aria-expanded="false">
+                        Categories
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        {% for category in categories %}
+                        <li><a class="dropdown-item" href="{{ url_for('show_category', category_id=category.id) }}">{{
+                            category.category_name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+
+            <form class="form-inline" action="/search" method="get">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search products" aria-label="Search"
+                       name="search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+</header>
+<main>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Product Images and Thumbnails Column -->
+            <div class="col-lg-6">
+                <!-- Main image box -->
+                <div id="main-image-box" class="main-image-box shadow-sm mb-4">
+                    <img src="" id="main-image" class="img-fluid" alt="Main Image">
+                </div>
+
+                <!-- Thumbnails -->
+                <div id="thumbnail-wrapper" class="thumbnail-wrapper d-flex flex-row flex-wrap">
+                    {% for color in colors %}
+                    <div class="color-images color-{{color.id}} mb-3">
+                        {% for image in color.images %}
+                        <img src="{{ url_for('static', filename='productImages/' ~ image.image_file_name) }}"
+                             class="img-thumbnail mr-2"
+                             alt="{{ product.product_title }}"
+                             onclick="updateMainImage(this)">
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Product Details Column -->
+            <div class="col-lg-6">
+                <div class="product-details">
+                    <h2 class="product-title mb-3">{{ product.product_title }}</h2>
+                    <h3 class="product-price text-success mb-3">{{ colors[0].price }} TL</h3>
+                    <!-- Color Options -->
+                    <div class="color-options mb-4">
+                        {% for color in colors %}
+                        <input type="radio" id="color-{{color.id}}" name="color" value="{{color.id}}"
+                               data-price="{{color.price}}" {% if loop.first %}checked{% endif %}>
+                        <label for="color-{{color.id}}" class="color-label mr-2">{{ color.color }}</label>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <button class="btn btn-primary btn-lg btn-block mb-4">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Description Row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-body">
+                        <h3 class="card-title text-primary">Description</h3>
+                        <p class="card-text">{{ product.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Event listener for color option changes
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.color-options input').forEach((inputElement) => {
+            inputElement.addEventListener('change', (event) => {
+                updateProductDetails(event.target.value, event.target.dataset.price);
+            });
+        });
+
+        // Initial call to display the first color images and price by default when the page loads
+        const initialColorInput = document.querySelector('.color-options input:checked');
+        if (initialColorInput) {
+            updateProductDetails(initialColorInput.value, initialColorInput.dataset.price);
+        }
+    });
+
+ function updateProductDetails(colorId, price) {
+    // Hide all color images
+    document.querySelectorAll('.color-images').forEach((imgDiv) => {
+        imgDiv.style.display = 'none';
+    });
+
+    // Show the images associated with the selected color and update the main image
+    const selectedColorImages = document.querySelector('.color-' + colorId);
+    if (selectedColorImages) {
+        selectedColorImages.style.display = 'block';
+        const firstThumbnail = selectedColorImages.querySelector('img');
+        if (firstThumbnail) {
+            updateMainImage(firstThumbnail);
+        }
+    }
+
+    // Update the price
+    const priceElement = document.querySelector('.product-price'); // corrected class name
+    if (priceElement) {
+        priceElement.textContent = price + ' TL';
+    }
+}
+
+    // Function to update the main image
+    function updateMainImage(thumbnail) {
+        var mainImage = document.getElementById('main-image');
+        mainImage.src = thumbnail.src;
+        mainImage.alt = thumbnail.alt;
+    }
+</script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</body>
+</html>
