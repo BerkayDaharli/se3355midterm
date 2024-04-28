@@ -197,7 +197,8 @@ def show_category(category_id):
     products = Product.query.filter_by(category_id=category_id).all()
     if selected_city_id:
         products.sort(key=lambda x: x.shipped_from_id != int(selected_city_id))
-
+    if selected_city_id is None:
+        selected_city_id = "0"
     return render_template('category.html', category=category, products=products,
                            cities=cities, selected_city_id=int(selected_city_id),
                            categories=categories, doorstep_tomorrow=doorstep_tomorrow)
@@ -213,7 +214,8 @@ def search():
     session['selected_city_id'] = selected_city_id  # Update session
 
     doorstep_tomorrow = request.args.get('doorstep_tomorrow', 'false') == 'true'
-
+    if selected_city_id is None:
+        selected_city_id = "0"
     if query:
         products = search_products(query)
         #Sort by whether the product is shipped from the same city as selected city.
