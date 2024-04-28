@@ -52,6 +52,7 @@
                 class="{{ 'active' if loop.first else '' }}"></li>
             {% endfor %}
         </ol>
+
         <!-- Wrapper for slides -->
         <div class="carousel-inner" role="listbox">
             {% for campaign in campaigns %}
@@ -68,7 +69,6 @@
                     <img src="{{ url_for('static', filename=campaign.image_file_name) }}"
                          class="campaign-image rounded-image"
                          alt="Campaign Image" style="flex: 1; max-width: 50%;">
-
                 </div>
             </div>
             {% endfor %}
@@ -85,7 +85,6 @@
         </a>
     </div>
 </main>
-
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

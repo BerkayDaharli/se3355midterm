@@ -79,9 +79,12 @@
                     <!-- Color Options -->
                     <div class="color-options mb-4">
                         {% for color in colors %}
-                        <input type="radio" id="color-{{color.id}}" name="color" value="{{color.id}}"
-                               data-price="{{color.price}}" {% if loop.first %}checked{% endif %}>
-                        <label for="color-{{color.id}}" class="color-label mr-2">{{ color.color }}</label>
+                        <button class="color-button"
+                                id="color-{{color.id}}"
+                                data-price="{{color.price}}"
+                                onclick="updateProductDetails('{{color.id}}', '{{color.price}}')"
+                                style="background-color: {{color.color}};">{{ color.color }}
+                        </button>
                         {% endfor %}
                     </div>
 
@@ -96,7 +99,7 @@
             <div class="col-12">
                 <div class="card border-0 shadow">
                     <div class="card-body">
-                        <h3 class="card-title text-primary">Description</h3>
+                        <h3 class="card-title text-primary">Product Description</h3>
                         <p class="card-text">{{ product.description }}</p>
                     </div>
                 </div>
@@ -110,50 +113,63 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    // Event listener for color option changes
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.color-options input').forEach((inputElement) => {
-            inputElement.addEventListener('change', (event) => {
-                updateProductDetails(event.target.value, event.target.dataset.price);
-            });
+document.addEventListener('DOMContentLoaded', function () {
+    // Set up the color button event listeners
+    document.querySelectorAll('.color-button').forEach((button) => {
+        button.addEventListener('click', function () {
+            updateProductDetails(this.id.replace('color-', ''), this.dataset.price);
         });
-
-        // Initial call to display the first color images and price by default when the page loads
-        const initialColorInput = document.querySelector('.color-options input:checked');
-        if (initialColorInput) {
-            updateProductDetails(initialColorInput.value, initialColorInput.dataset.price);
-        }
     });
 
- function updateProductDetails(colorId, price) {
-    // Hide all color images
-    document.querySelectorAll('.color-images').forEach((imgDiv) => {
-        imgDiv.style.display = 'none';
+    // Auto-select the first color on page load
+    const initialColorButton = document.querySelector('.color-button');
+    if (initialColorButton) {
+        updateProductDetails(initialColorButton.id.replace('color-', ''), initialColorButton.dataset.price);
+    }
+});
+
+function updateProductDetails(colorId, price) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.color-button').forEach((btn) => {
+        btn.classList.remove('active');
     });
 
-    // Show the images associated with the selected color and update the main image
+    // Add active class to the clicked button
+    const activeButton = document.getElementById('color-' + colorId);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+
+    // Update product details based on the selected color
+    // Here goes your logic to update images and price...
     const selectedColorImages = document.querySelector('.color-' + colorId);
+    document.querySelectorAll('.color-images').forEach((imgDiv) => {
+        imgDiv.style.display = 'none';  // Hide all images
+    });
+
     if (selectedColorImages) {
-        selectedColorImages.style.display = 'block';
+        selectedColorImages.style.display = 'block';  // Show selected images
         const firstThumbnail = selectedColorImages.querySelector('img');
         if (firstThumbnail) {
             updateMainImage(firstThumbnail);
         }
     }
 
-    // Update the price
-    const priceElement = document.querySelector('.product-price'); // corrected class name
+    const priceElement = document.querySelector('.product-price');
     if (priceElement) {
         priceElement.textContent = price + ' TL';
     }
 }
 
-    // Function to update the main image
-    function updateMainImage(thumbnail) {
-        var mainImage = document.getElementById('main-image');
+function updateMainImage(thumbnail) {
+    var mainImage = document.getElementById('main-image');
+    mainImage.classList.add('fade-out');
+    setTimeout(function () {
         mainImage.src = thumbnail.src;
         mainImage.alt = thumbnail.alt;
-    }
+        mainImage.classList.remove('fade-out');
+    }, 500);
+}
 </script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
