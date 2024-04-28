@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berkay's Store</title>
-    <!-- Bootstrap CSS -->
+    <title>Hepsiburada by Berkay</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <header>
-    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="/">
             <img src="static/logo.png" alt="Berkay's Store Logo" height="40"> <!-- Adjust height as needed -->
@@ -45,27 +43,21 @@
 </header>
 <main>
     <div id="campaignCarousel" class="carousel slide" data-ride="carousel">
-        <!-- Indicators -->
         <ol class="carousel-indicators">
             {% for campaign in campaigns %}
             <li data-target="#campaignCarousel" data-slide-to="{{ loop.index0 }}"
                 class="{{ 'active' if loop.first else '' }}"></li>
             {% endfor %}
         </ol>
-
-        <!-- Wrapper for slides -->
         <div class="carousel-inner" role="listbox">
             {% for campaign in campaigns %}
             <div class="carousel-item {{ 'active' if loop.first else '' }}">
-                <!-- Use flexbox to align items side by side -->
                 <div class="campaign-content d-flex align-items-center" style="height: 100vh;">
-                    <!-- Text box on the left -->
                     <div class="campaign-box text-left d-flex flex-column justify-content-center" style="flex: 1;">
                         <h2>{{ campaign.title }}</h2>
                         <p>{{ campaign.description }}</p>
                         <a href="{{ campaign.campaign_link }}" class="btn btn-primary">{{ campaign.button_name }}</a>
                     </div>
-                    <!-- Image on the right -->
                     <img src="{{ url_for('static', filename=campaign.image_file_name) }}"
                          class="campaign-image rounded-image"
                          alt="Campaign Image" style="flex: 1; max-width: 50%;">
@@ -74,7 +66,6 @@
             {% endfor %}
         </div>
 
-        <!-- Left and right controls -->
         <a class="carousel-control-prev" href="#campaignCarousel" role="button" data-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="sr-only">Previous</span>
@@ -85,14 +76,14 @@
         </a>
     </div>
 </main>
-<!-- Bootstrap JS and dependencies -->
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
     $('#campaignCarousel').carousel({
-        interval: 5000 // Changes the slide every 5 seconds
+        interval: 5000 //Change campaign every 5 secs
     });
 });
 </script>

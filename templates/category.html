@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{category.category_name}}</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <header>
-    <!-- Main Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-main">
         <a class="navbar-brand" href="/">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Berkay's Store Logo" height="40">
@@ -42,7 +40,6 @@
             </form>
         </div>
     </nav>
-    <!-- Secondary Navigation Bar for Filters -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <form class="form-inline w-100" action="{{ url_for('show_category', category_id=category.id) }}" method="get">
             <label for="citySelect" class="font-weight-bold mr-2">City:</label>
@@ -69,20 +66,17 @@
             {% for product in products %}
             <div class="col-md-4 col-sm-6 mb-4">
                 <div class="card h-100 {% if product.shipped_from_id == selected_city_id|string %}border-success{% else %}border-light{% endif %}">
-                    <!-- Product Image -->
                     <a href="{{ url_for('product_page', product_id=product.id) }}"
                        class="text-decoration-none text-dark">
                         <img src="{{ url_for('static', filename='productImages/' + product.colors[0].images[0].image_file_name) }}"
                              class="card-img-top" alt="{{ product.product_title }}">
                     </a>
-                    <!-- Mark if shipped from selected city -->
                     {% if product.shipped_from_id == selected_city_id and doorstep_tomorrow %}
                     <div class="badge badge-success" style="position: absolute; top: 10px; left: 10px;">
                         By your doorstep tomorrow!
                     </div>
                     {% endif %}
                     <div class="card-body">
-                        <!-- Product Title -->
                         <a href="{{ url_for('product_page', product_id=product.id) }}"
                            class="text-decoration-none text-dark">
                             <h5 class="card-title">{{ product.product_title }}</h5>
@@ -97,8 +91,6 @@
         </div>
     </div>
 </main>
-
-<!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

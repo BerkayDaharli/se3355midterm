@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results for {{query}}</title>
-    <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <header>
-    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         <a class="navbar-brand" href="/">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Berkay's Store Logo" height="40">
-            <!-- Adjust height as needed -->
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,9 +43,7 @@
     </nav>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <form class="form-inline w-100" action="{{ url_for('search') }}" method="get">
-            <!-- Retain the search query when the city is selected -->
             <input type="hidden" name="search" value="{{ query }}">
-
             <label for="citySelect" class="font-weight-bold mr-2">City:</label>
             <select class="form-control mr-sm-2" id="citySelect" name="city_id" onchange="this.form.submit()">
                 {% for city in cities %}
@@ -57,7 +52,6 @@
                 </option>
                 {% endfor %}
             </select>
-
             <div class="custom-control custom-switch ml-auto">
                 <input type="checkbox" class="custom-control-input" id="doorstepTomorrow" name="doorstep_tomorrow"
                        value="true" onchange="this.form.submit()" {% if request.args.get('doorstep_tomorrow', 'false')
@@ -83,10 +77,9 @@
                     <!-- Product Image -->
                     <a href="{{ url_for('product_page', product_id=product.id) }}"
                        class="text-decoration-none text-dark">
-                    <img src="{{ url_for('static', filename='productImages/' + product.colors[0].images[0].image_file_name) }}"
-                         class="card-img-top" alt="{{ product.product_title }}">
+                        <img src="{{ url_for('static', filename='productImages/' + product.colors[0].images[0].image_file_name) }}"
+                             class="card-img-top" alt="{{ product.product_title }}">
                     </a>
-                    <!-- Mark if shipped from selected city -->
                     {% if product.shipped_from_id == selected_city_id and doorstep_tomorrow%}
                     <div class="badge badge-success" style="position: absolute; top: 10px; left: 10px;">
                         By your doorstep tomorrow!
@@ -114,7 +107,7 @@
     </div>
 </main>
 
-<!-- Bootstrap JS and dependencies -->
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
