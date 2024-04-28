@@ -202,10 +202,10 @@ def add_cities():
 def add_campaigns():
     if Campaign.query.count() == 0:
         campaigns = [
-            Campaign(title='Summer Sale', description='Up to 50% off on summer items!',
+            Campaign(title='Sevilen elektronik ürünlerde', description='kaçırılmayacak fırsatlar',
                      image_file_name='c1.png', button_name="Hemen al!",
                      campaign_link='category/1'),
-            Campaign(title='Winter Wonders', description='Explore cozy winter gear!',
+            Campaign(title='İstediğin yemek için', description='indirimli malzemeler',
                      image_file_name='c2.png', button_name="Bu fırsatı kaçırma!",
                      campaign_link='#'),
             Campaign(title='Spring Collection', description='Fresh looks for spring!',

@@ -236,3 +236,7 @@ body {
 .product-shipped-from{
     color: #100;
 }
+
+.rounded-image {
+    border-radius: 15px; /* Adjust this value to increase or decrease the roundness */
+}

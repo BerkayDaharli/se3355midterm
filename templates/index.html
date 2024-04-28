@@ -65,8 +65,10 @@
                         <a href="{{ campaign.campaign_link }}" class="btn btn-primary">{{ campaign.button_name }}</a>
                     </div>
                     <!-- Image on the right -->
-                    <img src="{{url_for('static', filename=campaign.image_file_name) }}" class="campaign-image"
+                    <img src="{{ url_for('static', filename=campaign.image_file_name) }}"
+                         class="campaign-image rounded-image"
                          alt="Campaign Image" style="flex: 1; max-width: 50%;">
+
                 </div>
             </div>
             {% endfor %}
