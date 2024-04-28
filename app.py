@@ -158,8 +158,6 @@ def add_products_with_images():
             db.session.flush()
 
             for color_info in mock_product['colors']:
-                color_info = dict(color_info)
-                print(color_info)
                 product_color = ProductColor(
                     product_id=product.id,
                     color=color_info['color'],
